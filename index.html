@@ -1,0 +1,136 @@
+
+const RESTAURANT_WHATSAPP = "919876543210"; // Replace with your real number
+
+const cart = {};
+
+const cartItems = document.getElementById("cart-items");
+const cartCount = document.getElementById("cart-count");
+const cartTotal = document.getElementById("cart-total");
+
+document.getElementById("year").textContent = new Date().getFullYear();
+
+document.querySelectorAll(".add-btn").forEach(button => {
+  button.addEventListener("click", () => {
+    const name = button.dataset.name;
+    const price = Number(button.dataset.price);
+
+    if (!cart[name]) {
+      cart[name] = { price, quantity: 0 };
+    }
+
+    cart[name].quantity++;
+    renderCart();
+  });
+});
+
+function changeQuantity(name, change) {
+  if (!cart[name]) return;
+
+  cart[name].quantity += change;
+
+  if (cart[name].quantity <= 0) {
+    delete cart[name];
+  }
+
+  renderCart();
+}
+
+function renderCart() {
+  const entries = Object.entries(cart);
+
+  const totalQuantity = entries.reduce(
+    (sum, [, item]) => sum + item.quantity, 0
+  );
+
+  const totalPrice = entries.reduce(
+    (sum, [, item]) => sum + item.price * item.quantity, 0
+  );
+
+  cartCount.textContent = totalQuantity;
+  cartTotal.textContent = `₹${totalPrice}`;
+
+  if (entries.length === 0) {
+    cartItems.innerHTML = '<p class="muted">Your cart is empty.</p>';
+    return;
+  }
+
+  cartItems.innerHTML = entries.map(([name, item]) => `
+    <div class="cart-row">
+      <div>
+        <strong>${escapeHTML(name)}</strong>
+        <p class="muted">₹${item.price} × ${item.quantity}</p>
+      </div>
+      <div class="quantity-controls">
+        <button type="button" aria-label="Remove one"
+          onclick="changeQuantity('${escapeJS(name)}', -1)">−</button>
+        <span>${item.quantity}</span>
+        <button type="button" aria-label="Add one"
+          onclick="changeQuantity('${escapeJS(name)}', 1)">+</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function escapeHTML(value) {
+  return value.replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+function escapeJS(value) {
+  return value.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+}
+
+document.getElementById("checkout-form").addEventListener("submit", event => {
+  event.preventDefault();
+
+  const entries = Object.entries(cart);
+
+  if (entries.length === 0) {
+    alert("Please add at least one item to your cart.");
+    return;
+  }
+
+  if (!/^\d{10,15}$/.test(RESTAURANT_WHATSAPP)) {
+    alert("Please set the restaurant WhatsApp number in script.js.");
+    return;
+  }
+
+  const customerName = document.getElementById("customer-name").value.trim();
+  const customerPhone = document.getElementById("customer-phone").value.trim();
+  const customerAddress = document.getElementById("customer-address").value.trim();
+
+  const total = entries.reduce(
+    (sum, [, item]) => sum + item.price * item.quantity, 0
+  );
+
+  const orderLines = entries.map(([name, item]) =>
+    `${name} × ${item.quantity} = ₹${item.price * item.quantity}`
+  );
+
+  const message = [
+    "Hello Nexus Bite Purnea! I'd like to place an order.",
+    "",
+    `Name: ${customerName}`,
+    `Customer phone: ${customerPhone}`,
+    `Delivery address: ${customerAddress}`,
+    "",
+    "Order:",
+    ...orderLines,
+    "",
+    `Total: ₹${total}`,
+    "",
+    "Please confirm my order."
+  ].join("\n");
+
+  const whatsappURL =
+    `https://wa.me/${RESTAURANT_WHATSAPP}?text=${encodeURIComponent(message)}`;
+
+  window.open(whatsappURL, "_blank", "noopener,noreferrer");
+});
+
+renderCart();
