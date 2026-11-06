@@ -1,7 +1,7 @@
 // Nexus Bite Purnea — demo storefront.
 // IMPORTANT: Replace RESTAURANT_WHATSAPP with your WhatsApp number in international format,
 // digits only (India: 91 + 10-digit mobile number), before publishing.
-const RESTAURANT_WHATSAPP = "919470871670"; // Example format: "919876543210"
+const RESTAURANT_WHATSAPP = "918227040620"; // Example format: "919876543210"
 
 const menuItems = [
   {id:1,name:"Nexus Smash Burger",category:"Burgers",price:189,label:"HOUSE FAVOURITE",description:"Juicy burger, crisp lettuce, cheese & our signature sauce.",image:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=700&q=80"},
